@@ -95,7 +95,8 @@ This repository now includes a small Node.js HTTP API with file-backed task stor
 ```bash
 npm start
 ```
-The server listens on port 3000 by default and stores data in `tasks.json`.
+The server listens on port 3000 by default and stores data in `tasks.json`. Visit
+`http://localhost:3000` in your browser for a minimal interface to manage tasks.
 
 ### Available endpoints
 - `GET /tasks` – list tasks

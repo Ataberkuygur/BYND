@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>BYND Tasks</title>
+</head>
+<body>
+  <h1>Tasks</h1>
+  <form id="new-task-form">
+    <input id="title" placeholder="New task" />
+    <button>Add</button>
+  </form>
+  <ul id="tasks"></ul>
+<script>
+async function load() {
+  const res = await fetch('/tasks');
+  const tasks = await res.json();
+  const list = document.getElementById('tasks');
+  list.innerHTML = '';
+  tasks.forEach(t => {
+    const li = document.createElement('li');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = t.completed;
+    checkbox.addEventListener('change', async () => {
+      await fetch(`/tasks/${t.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: checkbox.checked })
+      });
+      load();
+    });
+    li.appendChild(checkbox);
+    const span = document.createElement('span');
+    span.textContent = t.title;
+    li.appendChild(span);
+    const del = document.createElement('button');
+    del.textContent = 'Delete';
+    del.addEventListener('click', async () => {
+      await fetch(`/tasks/${t.id}`, { method: 'DELETE' });
+      load();
+    });
+    li.appendChild(del);
+    list.appendChild(li);
+  });
+}
+
+document.getElementById('new-task-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const title = document.getElementById('title');
+  if (!title.value) return;
+  await fetch('/tasks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: title.value })
+  });
+  title.value = '';
+  load();
+});
+
+load();
+</script>
+</body>
+</html>

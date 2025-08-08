@@ -24,10 +24,17 @@ function createServer() {
     const url = new URL(req.url, `http://${req.headers.host}`);
     res.setHeader('Content-Type', 'application/json');
 
-    if (req.method === 'GET' && url.pathname === '/') {
-      res.writeHead(200, { 'Content-Type': 'text/plain' });
-      return res.end('BYND API');
-    }
+      if (req.method === 'GET' && url.pathname === '/') {
+        const file = path.join(__dirname, 'index.html');
+        try {
+          const html = fs.readFileSync(file);
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          return res.end(html);
+        } catch {
+          res.writeHead(200, { 'Content-Type': 'text/plain' });
+          return res.end('BYND API');
+        }
+      }
 
     if (req.method === 'GET' && url.pathname === '/tasks') {
       return res.end(JSON.stringify(tasks));
