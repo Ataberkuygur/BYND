@@ -78,6 +78,46 @@ function createServer() {
       return res.end(JSON.stringify(task));
     }
 
+    if (req.method === 'PATCH' && url.pathname.startsWith('/tasks/')) {
+      const id = parseInt(url.pathname.split('/')[2], 10);
+      const task = tasks.find(t => t.id === id);
+      if (!task) {
+        res.writeHead(404);
+        return res.end(JSON.stringify({ error: 'not found' }));
+      }
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', () => {
+        try {
+          const data = JSON.parse(body || '{}');
+          if (!('title' in data) && !('completed' in data)) {
+            res.writeHead(400);
+            return res.end(JSON.stringify({ error: 'nothing to update' }));
+          }
+          if ('title' in data) {
+            if (typeof data.title !== 'string' || !data.title) {
+              res.writeHead(400);
+              return res.end(JSON.stringify({ error: 'invalid title' }));
+            }
+            task.title = data.title;
+          }
+          if ('completed' in data) {
+            if (typeof data.completed !== 'boolean') {
+              res.writeHead(400);
+              return res.end(JSON.stringify({ error: 'invalid completed' }));
+            }
+            task.completed = data.completed;
+          }
+          save();
+          return res.end(JSON.stringify(task));
+        } catch {
+          res.writeHead(400);
+          return res.end(JSON.stringify({ error: 'invalid json' }));
+        }
+      });
+      return;
+    }
+
     if (req.method === 'DELETE' && url.pathname.startsWith('/tasks/')) {
       const id = parseInt(url.pathname.split('/')[2], 10);
       const index = tasks.findIndex(t => t.id === id);

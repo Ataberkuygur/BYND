@@ -55,3 +55,37 @@ test('task lifecycle with persistence', async () => {
     cleanup();
   }
 });
+
+test('updating tasks via patch', async () => {
+  cleanup();
+  const { server, base } = await startServer();
+  try {
+    let res = await fetch(`${base}/tasks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'initial' })
+    });
+    const task = await res.json();
+
+    res = await fetch(`${base}/tasks/${task.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'updated', completed: true })
+    });
+    assert.strictEqual(res.status, 200);
+    const updated = await res.json();
+    assert.strictEqual(updated.title, 'updated');
+    assert.strictEqual(updated.completed, true);
+
+    res = await fetch(`${base}/tasks/${task.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed: false })
+    });
+    const toggled = await res.json();
+    assert.strictEqual(toggled.completed, false);
+  } finally {
+    server.close();
+    cleanup();
+  }
+});

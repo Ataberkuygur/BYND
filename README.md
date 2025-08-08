@@ -102,6 +102,7 @@ The server listens on port 3000 by default and stores data in `tasks.json`.
 - `GET /tasks/:id` – fetch a single task
 - `POST /tasks` – create a task with `{ "title": "..." }`
 - `POST /tasks/:id/complete` – mark a task complete
+- `PATCH /tasks/:id` – update a task's `title` or `completed` state
 - `DELETE /tasks/:id` – remove a task
 
 ### Run tests
