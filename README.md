@@ -87,3 +87,25 @@ BYND is an innovative productivity app that redefines personal goal management t
 
 ## Summary
 BYND isn’t just a productivity app; it’s a deeply personal system for building discipline, purpose, and emotional alignment. With its voice-first approach, emotionally intelligent AI, and cutting-edge voice cloning, it offers a one-of-a-kind experience that could redefine how we interact with our goals. With the right execution, it has the potential to become a viral phenomenon and a long-term category leader in AI-driven personal growth.
+
+## Development
+This repository now includes a small Node.js HTTP API with file-backed task storage.
+
+### Run the server
+```bash
+npm start
+```
+The server listens on port 3000 by default and stores data in `tasks.json`.
+
+### Available endpoints
+- `GET /tasks` – list tasks
+- `GET /tasks/:id` – fetch a single task
+- `POST /tasks` – create a task with `{ "title": "..." }`
+- `POST /tasks/:id/complete` – mark a task complete
+- `DELETE /tasks/:id` – remove a task
+
+### Run tests
+```bash
+npm test
+```
+
