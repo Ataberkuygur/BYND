@@ -1,0 +1,335 @@
+Here’s a **single JSON prompt** you can drop into your IDE/agent to recreate the *exact* UI (Calendar, Home, Chat) with a bottom nav and center mic. It includes layout, tokens, colors, states, micro-interactions, and sample content.
+
+```json
+{
+  "app": {
+    "name": "BYND",
+    "tagline": "Voice-first productivity with emotional clarity",
+    "platform": "mobile",
+    "design_goal": "Clean, minimalist, premium; light-first with matching dark mode; crisp typography; soft depth; colorful category accents."
+  },
+
+  "foundations": {
+    "grid": { "base": 8, "columns": 12, "gutter": 16, "safe_area": true },
+    "radius": { "xs": 8, "sm": 12, "md": 16, "lg": 20, "xl": 28, "pill": 999 },
+    "elevation": {
+      "none": "shadow: none",
+      "card": "shadow: 0 4 12 rgba(0,0,0,0.06)",
+      "nav": "shadow: 0 6 24 rgba(0,0,0,0.10)",
+      "fab": "shadow: 0 10 30 rgba(0,0,0,0.18)"
+    },
+    "typography": {
+      "font_family": "SF Pro / Inter equivalent",
+      "scale": {
+        "display": { "size": 32, "weight": 700, "line": 36, "tracking": -0.5 },
+        "title":   { "size": 24, "weight": 700, "line": 28, "tracking": -0.25 },
+        "subtitle":{ "size": 17, "weight": 600, "line": 22 },
+        "body":    { "size": 16, "weight": 500, "line": 22 },
+        "label":   { "size": 13, "weight": 600, "line": 16, "upper": false },
+        "caption": { "size": 12, "weight": 500, "line": 14 }
+      }
+    },
+    "spacing": { "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "xxl": 32 },
+
+    "palette": {
+      "light": {
+        "bg": "#FFF8F0",
+        "surface": "#FFFFFF",
+        "textPrimary": "#1B1C1E",
+        "textSecondary": "#6B7078",
+        "divider": "#EDE9E3",
+        "accentMic": "#FF6A3D",
+        "accentMeetings": "#BFE3FF",
+        "accentPayments": "#FFE1B3",
+        "accentTasks": "#CFECD6",
+        "accentMeetingsText": "#0B3C74",
+        "accentPaymentsText": "#7A4A00",
+        "accentTasksText": "#1A5A34",
+        "calendarDot": "#1B6DFF",
+        "error": "#D92D20",
+        "success": "#12B76A",
+        "warning": "#F79009"
+      },
+      "dark": {
+        "bg": "#0E1114",
+        "surface": "#15181B",
+        "textPrimary": "#F5F6F7",
+        "textSecondary": "#9AA2AE",
+        "divider": "#22272B",
+        "accentMic": "#FF7D55",
+        "accentMeetings": "#183B5C",
+        "accentPayments": "#4A3620",
+        "accentTasks": "#1D3B2A",
+        "accentMeetingsText": "#D6EEFF",
+        "accentPaymentsText": "#FFE9C9",
+        "accentTasksText": "#D2F5DF",
+        "calendarDot": "#4C8DFF",
+        "error": "#F97066",
+        "success": "#32D583",
+        "warning": "#FDB022"
+      }
+    }
+  },
+
+  "navigation": {
+    "type": "bottom_nav_with_center_fab",
+    "height": 88,
+    "background": "surface",
+    "items": [
+      { "key": "calendar", "icon": "calendar", "label": "Calendar" },
+      { "key": "home",     "icon": "checklist", "label": "Home" },
+      { "key": "mic",      "icon": "microphone_fill", "label": "Record", "is_center_fab": true, "size": 64, "accent": "accentMic" },
+      { "key": "chat",     "icon": "chat_bubble", "label": "Chat" },
+      { "key": "profile",  "icon": "user", "label": "Me", "hidden_for_mvp": true }
+    ],
+    "behavior": {
+      "center_fab_pressed": "start_voice_capture",
+      "haptics": "impactMedium",
+      "elevation": "nav",
+      "safe_area": true
+    }
+  },
+
+  "micro_interactions": {
+    "press": { "scale": 0.98, "duration_ms": 100, "easing": "easeOut" },
+    "card_hover": { "y": -2, "shadow": "card" },
+    "fab_recording": { "pulse": true, "pulse_size": 6, "rate_ms": 900 },
+    "screen_transition": { "type": "slide_fade", "duration_ms": 220 },
+    "toast": { "position": "top", "duration_ms": 2200, "radius": "md" }
+  },
+
+  "accessibility": {
+    "dynamic_type": true,
+    "contrast_min_ratio": 4.5,
+    "hit_target_min": 44,
+    "voiceover": {
+      "mic": "Record. Double-tap to start. Double-tap again to stop.",
+      "calendar_day": "Day {day}. {eventsCount} events.",
+      "payment_badge": "Awaiting Payments. {count} items. Next due {nextDueDate}."
+    },
+    "haptics": { "success": "notificationSuccess", "warning": "notificationWarning", "error": "notificationError" }
+  },
+
+  "screens": [
+    {
+      "key": "calendar",
+      "title": "Calendar",
+      "layout": {
+        "header": { "visible": false },
+        "sections": [
+          {
+            "type": "month_view",
+            "style": {
+              "bg": "surface",
+              "radius": "lg",
+              "padding": "lg",
+              "title_typography": "title",
+              "weekday_typography": "label",
+              "day_typography": "body",
+              "today_badge": { "bg": "textPrimary", "text": "surface" },
+              "selected_fill": "calendarDot",
+              "dot_color": "calendarDot",
+              "spacing": "md"
+            },
+            "interactions": {
+              "tap_day": "select_day_and_scroll_agenda",
+              "swipe_left_right": "change_month",
+              "long_press_day": "create_quick_task_for_day"
+            }
+          },
+          {
+            "type": "agenda_list",
+            "empty_state": {
+              "icon": "sparkles",
+              "title": "No events today",
+              "subtitle": "Tap the mic to add or say: “Schedule coffee at 4pm.”",
+              "cta": { "label": "Add task", "action": "start_voice_capture" }
+            },
+            "item_style": {
+              "radius": "md",
+              "padding": "lg",
+              "elevation": "card",
+              "divider": "divider",
+              "left_indicator": true,
+              "time_typography": "label",
+              "title_typography": "body",
+              "note_typography": "caption"
+            }
+          }
+        ]
+      },
+      "sample_data": {
+        "selected_date": "2025-08-17",
+        "events": [
+          { "id": "evt1", "title": "Project Review", "time": "10:00", "duration_min": 45, "category": "Meetings" },
+          { "id": "evt2", "title": "Submit Timesheet", "time": "13:00", "duration_min": 10, "category": "Tasks" }
+        ]
+      }
+    },
+
+    {
+      "key": "home",
+      "title": "Home",
+      "layout": {
+        "header": { "visible": true, "title": "Home", "right_action": { "icon": "more" } },
+        "sections": [
+          {
+            "type": "category_card",
+            "category": "Meetings",
+            "accent_bg": "accentMeetings",
+            "accent_text": "accentMeetingsText",
+            "icon": "calendar_check",
+            "items_visible": 2,
+            "cta": { "label": "View all", "action": "navigate_calendar_filter_meetings" },
+            "item_chip": { "icon": "clock", "text_color": "textSecondary" }
+          },
+          {
+            "type": "category_card",
+            "category": "Awaiting Payments",
+            "accent_bg": "accentPayments",
+            "accent_text": "accentPaymentsText",
+            "icon": "wallet",
+            "items_visible": 2,
+            "cta": { "label": "View all", "action": "open_payments_list" },
+            "item_badge": { "text": "Due", "color": "warning" }
+          },
+          {
+            "type": "category_card",
+            "category": "Tasks",
+            "accent_bg": "accentTasks",
+            "accent_text": "accentTasksText",
+            "icon": "check_circle",
+            "items_visible": 3,
+            "cta": { "label": "View all", "action": "open_tasks_list" },
+            "item_checkbox": { "enabled": true, "complete_color": "success" }
+          }
+        ]
+      },
+      "sample_data": {
+        "Meetings": [
+          { "id": "m1", "title": "Design Review", "time": "Today 10:00", "location": "Zoom", "status": "scheduled" },
+          { "id": "m2", "title": "Client Sync", "time": "Tomorrow 15:00", "location": "Office", "status": "scheduled" }
+        ],
+        "Awaiting Payments": [
+          { "id": "p1", "title": "Car Insurance", "amount": "$120.87", "due": "Tomorrow", "source": "Email: ACME Insurance" },
+          { "id": "p2", "title": "Internet Service", "amount": "$55.99", "due": "Aug 24", "source": "SMS: FiberNet" }
+        ],
+        "Tasks": [
+          { "id": "t1", "title": "Submit Timesheet", "due": "Today", "checked": false },
+          { "id": "t2", "title": "Buy Groceries", "due": "Tomorrow", "checked": false },
+          { "id": "t3", "title": "Jog 30 min", "due": "Sat", "checked": true }
+        ]
+      }
+    },
+
+    {
+      "key": "chat",
+      "title": "Chat",
+      "layout": {
+        "header": { "visible": true, "title": "Chat", "left_action": { "icon": "back" }, "right_action": { "icon": "more" } },
+        "bubble_style": {
+          "user_bg": "#E9F5FF",
+          "assistant_bg": "#FFF1C7",
+          "user_text": "#0B3C74",
+          "assistant_text": "#4A3B00",
+          "radius": "lg",
+          "padding_vertical": "md",
+          "padding_horizontal": "lg",
+          "spacing_vertical": "md"
+        },
+        "composer": {
+          "placeholder": "Type or use the mic…",
+          "left_icon": "attachments",
+          "right_actions": [
+            { "icon": "send", "action": "send_text" }
+          ],
+          "mic_behavior": "same_center_fab_controls_recording_state"
+        }
+      },
+      "behaviors": {
+        "assistant_tone": "supportive, concise, action-oriented",
+        "quick_suggestions": [
+          "What are my top priorities today?",
+          "Summarize my week.",
+          "Any unpaid bills?"
+        ],
+        "link_to_actions": {
+          "schedule": "open_calendar_with_suggestion",
+          "create_task": "append_task_and_confirm",
+          "mark_paid": "move_payment_to_completed"
+        }
+      },
+      "sample_data": {
+        "messages": [
+          { "role": "user", "text": "I’m feeling overwhelmed about next week." },
+          { "role": "assistant", "text": "Let’s break it down into smaller steps you can tackle one at a time." },
+          { "role": "assistant", "text": "How about focusing on your top priorities first? I’ll generate a new task list for you." },
+          { "role": "user", "text": "Okay, thanks." }
+        ]
+      }
+    }
+  ],
+
+  "voice_capture": {
+    "states": [
+      { "key": "idle", "mic_icon": "microphone_fill", "hint": "Tap to speak" },
+      { "key": "recording", "mic_icon": "microphone_wave", "hint": "Listening… Speak naturally", "bg_pulse": "accentMic", "waveform": true },
+      { "key": "processing", "mic_icon": "loader", "hint": "Processing your request…" },
+      { "key": "success", "mic_icon": "checkmark", "hint": "Added", "toast": "success" },
+      { "key": "error", "mic_icon": "alert", "hint": "Try again", "toast": "error" }
+    ],
+    "intents_examples": [
+      "Schedule project review tomorrow at 10am",
+      "Move the run to 7:30",
+      "Pay the internet bill on Friday",
+      "What’s on my calendar for today?"
+    ],
+    "output_actions": [
+      "create_task",
+      "schedule_event",
+      "update_event",
+      "categorize_payment",
+      "reply_in_chat"
+    ]
+  },
+
+  "payments_detection": {
+    "description": "Analyze SMS and email metadata/content (with permission) to auto-detect unpaid items and add to 'Awaiting Payments'.",
+    "ui_hooks": {
+      "home_badge": "Shows count and next due date",
+      "agenda_tag": "Shows 'Due' badge on calendar events derived from payments",
+      "chat_shortcut": "Quick action: 'Any unpaid bills?'"
+    },
+    "sample_matches": [
+      { "source": "Email", "sender": "ACME Insurance", "subject": "Payment due", "amount": "$120.87", "due_date": "2025-08-09" },
+      { "source": "SMS", "sender": "FiberNet", "message": "Your bill of $55.99 is due on Aug 24", "due_date": "2025-08-24" }
+    ]
+  },
+
+  "states": {
+    "empty": {
+      "home": {
+        "title": "Let’s get started",
+        "subtitle": "Tap the mic and say “Add project review tomorrow at 10am.”",
+        "illustration": "calendar_sparkle"
+      }
+    },
+    "loading": { "skeletons": true, "duration_hint_ms": 600 },
+    "errors": {
+      "network": { "title": "Connection lost", "cta": "Retry" },
+      "permissions": { "title": "Permission needed", "subtitle": "Enable microphone and notifications in Settings." }
+    }
+  },
+
+  "qa_checklist": [
+    "Bottom nav is visible on all screens; center mic overlaps safely above the home indicator.",
+    "Category cards use distinct accent colors and readable text on both themes.",
+    "Tap-and-hold mic toggles: hold-to-talk; single tap to lock recording.",
+    "Calendar: swipe month, tap day, long-press to quick-add.",
+    "Chat: supports quick suggestions and links actions to calendar/tasks.",
+    "Accessibility: all interactive elements ≥44px; VoiceOver labels provided.",
+    "Dark mode switches correctly with equal contrast.",
+    "Empty/Loading/Error states are implemented."
+  ]
+}
+```
