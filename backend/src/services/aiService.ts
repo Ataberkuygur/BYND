@@ -17,34 +17,86 @@ export async function interpretUserUtterance(utterance: string): Promise<Interpr
   // Enhanced dummy fallback with better parsing
   const dummyFallback = (): InterpretedTask[] => {
     const tasks: InterpretedTask[] = [];
-    // naive split by ' and ' / ',' to allow multiple
-    const parts = utterance.split(/(?:,| and )/i).map(p => p.trim()).filter(Boolean);
-    const now = new Date();
-    for (const p of parts) {
-      let dueAt: string | undefined;
-      // detect 'tomorrow' or 'today'
-      let base = new Date();
-      if (/tomorrow/i.test(p)) {
-        base = new Date(now.getTime() + 24*60*60*1000);
+    // Better parsing for common task patterns
+    const taskPatterns = [
+      /(?:add|create|make|schedule)\s+(.+?)(?:\s+(?:by|for|at|on)\s+(.+?))?$/i,
+      /(?:remind me to|need to|have to)\s+(.+?)(?:\s+(?:by|for|at|on)\s+(.+?))?$/i,
+      /(.+?)(?:\s+(?:by|for|at|on)\s+(.+?))?$/i
+    ];
+    
+    let matched = false;
+    for (const pattern of taskPatterns) {
+      const match = utterance.match(pattern);
+      if (match) {
+        const title = match[1]?.trim();
+        const timeStr = match[2]?.trim();
+        
+        if (title) {
+          let dueAt: string | undefined;
+          if (timeStr) {
+            dueAt = parseTimeString(timeStr);
+          }
+          
+          tasks.push({ 
+            title: title.charAt(0).toUpperCase() + title.slice(1),
+            dueAt,
+            description: timeStr ? `Due: ${timeStr}` : undefined
+          });
+          matched = true;
+          break;
+        }
       }
-      // detect time like 9am, 9:30am, 14:00
-      const timeMatch = p.match(/\b(\d{1,2})(?::(\d{2}))?\s?(am|pm)?\b/i);
-      if (timeMatch) {
-        let hour = parseInt(timeMatch[1],10);
-        const minute = timeMatch[2]? parseInt(timeMatch[2],10):0;
-        const mer = timeMatch[3]?.toLowerCase();
-        if (mer === 'pm' && hour < 12) hour += 12;
-        if (mer === 'am' && hour === 12) hour = 0;
-        base.setHours(hour, minute, 0, 0);
-        dueAt = base.toISOString();
-      } else if (/tomorrow|today/i.test(p)) {
-        // default 09:00 local
-        base.setHours(9,0,0,0);
-        dueAt = base.toISOString();
-      }
-      tasks.push({ title: p.slice(0, 80), dueAt });
     }
-    return tasks.length? tasks: [{ title: utterance.slice(0,60) }];
+    
+    if (!matched) {
+      // Fallback to simple task creation
+      tasks.push({ 
+        title: utterance.charAt(0).toUpperCase() + utterance.slice(1),
+        description: 'Created from voice command'
+      });
+    }
+    
+    return tasks;
+  };
+  
+  // Helper function to parse time strings
+  const parseTimeString = (timeStr: string): string | undefined => {
+    const now = new Date();
+    let base = new Date();
+    
+    // Handle relative dates
+    if (/tomorrow/i.test(timeStr)) {
+      base = new Date(now.getTime() + 24*60*60*1000);
+    } else if (/today/i.test(timeStr)) {
+      base = new Date();
+    } else if (/next week/i.test(timeStr)) {
+      base = new Date(now.getTime() + 7*24*60*60*1000);
+    }
+    
+    // Handle specific times
+    const timeMatch = timeStr.match(/\b(\d{1,2})(?::(\d{2}))?\s?(am|pm)?\b/i);
+    if (timeMatch) {
+      let hour = parseInt(timeMatch[1], 10);
+      const minute = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+      const mer = timeMatch[3]?.toLowerCase();
+      
+      if (mer === 'pm' && hour < 12) hour += 12;
+      if (mer === 'am' && hour === 12) hour = 0;
+      
+      base.setHours(hour, minute, 0, 0);
+      return base.toISOString();
+    } else if (/morning/i.test(timeStr)) {
+      base.setHours(9, 0, 0, 0);
+      return base.toISOString();
+    } else if (/afternoon/i.test(timeStr)) {
+      base.setHours(14, 0, 0, 0);
+      return base.toISOString();
+    } else if (/evening/i.test(timeStr)) {
+      base.setHours(18, 0, 0, 0);
+      return base.toISOString();
+    }
+    
+    return undefined;
   };
 
   if (isDummy) {

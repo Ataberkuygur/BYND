@@ -26,7 +26,13 @@ app.use(helmet({
   },
   crossOriginEmbedderPolicy: false // adjust if needed for certain responses
 }));
-app.use(rateLimit({ windowMs: 60_000, max: 120 }));
+app.use(rateLimit({ 
+  windowMs: 60_000, 
+  max: 120,
+  message: { code: 'RATE_LIMITED', message: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false
+}));
 
 registerRoutes(app);
 app.use(errorHandler);

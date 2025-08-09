@@ -7,8 +7,11 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
     "demo": "ts-node src/demo.ts",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "test:watch": "jest --runInBand --watch",
+    "test:coverage": "jest --runInBand --coverage"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

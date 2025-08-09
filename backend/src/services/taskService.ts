@@ -36,10 +36,32 @@ export async function createTask(userId: string, data: Partial<Pick<Task, 'title
   return task;
 }
 
-export async function listTasks(userId: string): Promise<Task[]> {
+export async function listTasks(userId: string, options: {
+  completed?: boolean;
+  limit?: number;
+  offset?: number;
+} = {}): Promise<Task[]> {
+  const { completed, limit = 50, offset = 0 } = options;
+  
   const sb = getSupabase();
   if (sb) {
-    const { data, error } = await sb.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+    let query = sb.from('tasks')
+      .select('*')
+      .eq('user_id', userId);
+    
+    if (completed !== undefined) {
+      if (completed) {
+        query = query.not('completed_at', 'is', null);
+      } else {
+        query = query.is('completed_at', null);
+      }
+    }
+    
+    query = query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    const { data, error } = await query;
     if (error) { console.error('Supabase list tasks error', error.message); return []; }
     return (data || []).map(r => ({
       id: r.id,
@@ -53,7 +75,17 @@ export async function listTasks(userId: string): Promise<Task[]> {
       source: r.source || 'user'
     } as Task));
   }
-  return [...memoryTasks.values()].filter(t => t.userId === userId);
+  
+  // In-memory fallback with filtering
+  let tasks = [...memoryTasks.values()].filter(t => t.userId === userId);
+  
+  if (completed !== undefined) {
+    tasks = tasks.filter(t => completed ? !!t.completedAt : !t.completedAt);
+  }
+  
+  return tasks
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(offset, offset + limit);
 }
 
 export async function updateTask(userId: string, id: string, patch: Partial<Pick<Task, 'title' | 'description' | 'dueAt' | 'completedAt'>>): Promise<Task | null> {

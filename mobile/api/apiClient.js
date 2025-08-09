@@ -4,10 +4,10 @@ import { Platform } from 'react-native';
 
 // Backend running on port 4011 to avoid Expo dev server conflict
 const DEFAULT_API_BASE = Platform.OS === 'ios'
-  ? 'http://localhost:4011'
+  ? 'http://localhost:4000'
   : Platform.OS === 'web'
-    ? 'http://localhost:4011'
-    : 'http://10.0.2.2:4011';
+    ? 'http://localhost:4000'
+    : 'http://10.0.2.2:4000';
 // Allow override, else start with default; we may swap ports automatically if connection refused.
 // eslint-disable-next-line no-undef
 let API_BASE = (globalThis && globalThis.__BYND_API__) || DEFAULT_API_BASE;
@@ -108,19 +108,19 @@ export function getAccessToken() { return accessToken; }
 // Task Management API
 export const taskAPI = {
   // Get all tasks
-  getTasks: () => api.get('/tasks'),
+  getTasks: (params = {}) => api.get('/tasks', { params }),
   
   // Create a new task
   createTask: (taskData) => api.post('/tasks', taskData),
   
   // Update a task
-  updateTask: (id, taskData) => api.put(`/tasks/${id}`, taskData),
+  updateTask: (id, taskData) => api.patch(`/tasks/${id}`, taskData),
   
   // Delete a task
   deleteTask: (id) => api.delete(`/tasks/${id}`),
   
   // Mark task as complete
-  completeTask: (id) => api.patch(`/tasks/${id}/complete`)
+  completeTask: (id) => api.patch(`/tasks/${id}`, { completed: true })
 };
 
 // Calendar API

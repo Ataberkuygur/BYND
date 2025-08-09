@@ -5,7 +5,14 @@ import { z } from 'zod';
 import { validate } from '../middleware/validate';
 
 const createTaskSchema = z.object({ body: z.object({ title: z.string().min(1).max(200), description: z.string().max(2000).optional(), dueAt: z.string().datetime().optional() }) });
-const patchTaskSchema = z.object({ body: z.object({ title: z.string().min(1).max(200).optional(), description: z.string().max(2000).nullable().optional(), dueAt: z.string().datetime().nullable().optional(), completedAt: z.string().datetime().nullable().optional() }) });
+const patchTaskSchema = z.object({ 
+  body: z.object({ 
+    title: z.string().min(1).max(200).optional(), 
+    description: z.string().max(2000).nullable().optional(), 
+    dueAt: z.string().datetime().nullable().optional(), 
+    completedAt: z.string().datetime().nullable().optional() 
+  }) 
+});
 
 export const router = Router();
 
@@ -13,7 +20,13 @@ router.use(auth);
 
 router.get('/', async (req: AuthRequest, res, next) => {
   try {
-    res.json(await listTasks(req.userId!));
+    const { completed, limit = '50', offset = '0' } = req.query;
+    const tasks = await listTasks(req.userId!, {
+      completed: completed === 'true',
+      limit: parseInt(limit as string),
+      offset: parseInt(offset as string)
+    });
+    res.json(tasks);
   } catch (e) { next(e); }
 });
 
@@ -27,6 +40,12 @@ router.post('/', validate(createTaskSchema), async (req: AuthRequest, res, next)
 
 router.patch('/:id', validate(patchTaskSchema), async (req: AuthRequest, res, next) => {
   try {
+    // Handle completion toggle
+    if (req.body.completed !== undefined) {
+      req.body.completedAt = req.body.completed ? new Date().toISOString() : null;
+      delete req.body.completed;
+    }
+    
     const updated = await updateTask(req.userId!, req.params.id, req.body || {});
     if (!updated) return res.status(404).json({ error: 'Not found' });
     res.json(updated);

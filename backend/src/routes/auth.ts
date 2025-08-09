@@ -10,7 +10,10 @@ import { z } from 'zod';
 import { validate } from '../middleware/validate';
 
 const emailSchema = z.string().email().max(254);
-const passwordSchema = z.string().min(8).max(100).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/);
+const passwordSchema = z.string().min(8).max(100)
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number');
 const registerSchema = z.object({ body: z.object({ email: emailSchema, password: passwordSchema }) });
 const loginSchema = registerSchema;
 const refreshSchema = z.object({ body: z.object({ refreshToken: z.string().min(10) }) });

@@ -51,7 +51,7 @@ export function HomeScreen({ colorScheme, onThemeToggle }) {
       setLoading(true);
       
       // Load tasks
-      const tasksResponse = await taskAPI.getTasks();
+      const tasksResponse = await taskAPI.getTasks({ completed: false, limit: 10 });
       const allTasks = tasksResponse.data || [];
       
       // Load calendar events (meetings)
@@ -60,7 +60,6 @@ export function HomeScreen({ colorScheme, onThemeToggle }) {
       
       // Filter incomplete tasks
       const incompleteTasks = allTasks
-        .filter(task => !task.completedAt)
         .slice(0, 3)
         .map(task => ({
           id: task.id,
@@ -154,17 +153,18 @@ export function HomeScreen({ colorScheme, onThemeToggle }) {
 
   const handleTaskToggle = async (task) => {
     HapticFeedback.success();
+    
+    // Optimistically update UI
+    setTasks(prev => prev.filter(t => t.id !== task.id));
+    
     await executeApiCall(async () => {
       await taskAPI.completeTask(task.originalTask.id);
-      
-      // Remove completed task from list
-      setTasks(prev => prev.filter(t => t.id !== task.id));
-      
     }, {
       context: 'Completing Task',
       showErrorAlert: true,
-      onSuccess: () => {
-        // Task completed successfully - no need for additional feedback
+      onError: () => {
+        // Revert optimistic update on error
+        setTasks(prev => [task, ...prev]);
       }
     });
   };

@@ -308,7 +308,11 @@ export function BottomNav({
             color={isActive ? theme.colors.activeIcon : theme.colors.inactiveIcon}
           />
         </View>
-        {/* Removed tab labels as requested */}
+        {isActive && (
+          <Text style={[styles.tabLabel, { color: theme.colors.activeIcon }]}>
+            {label}
+          </Text>
+        )}
       </TouchableOpacity>
     );
   };
@@ -462,6 +466,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4
+  },
+  tabLabel: {
+    fontSize: 11,
+    textAlign: 'center',
+    fontWeight: '500'
   },
   tabLabel: {
     fontSize: 11,

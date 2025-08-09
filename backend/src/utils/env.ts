@@ -9,7 +9,7 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   ELEVENLABS_API_KEY: z.string().optional(),
-  DEVELOPMENT_MODE: z.string().optional()
+  DEVELOPMENT_MODE: z.string().optional(),
   ,ACCESS_TOKEN_TTL_MIN: z.string().optional() // minutes
   ,REFRESH_TOKEN_TTL_DAYS: z.string().optional()
 });

@@ -489,14 +489,12 @@ function MainShell({ colorScheme, onThemeToggle }) {
 }
 
 export default function App() {
-  // DEVELOPMENT MODE: Skip authentication for testing
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Changed to true for dev testing
-  const [loading, setLoading] = useState(false); // Changed to false to skip loading
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [colorScheme, setColorScheme] = useState('light'); // Default to light theme
 
   useEffect(() => {
-    // DEVELOPMENT MODE: Comment out auth check for testing
-    // checkAuthStatus();
+    checkAuthStatus();
     
     // Listen for system theme changes
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
